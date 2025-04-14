@@ -1,0 +1,20 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.db
+*.sqlite3
+.vscode/
+.vmm/
+*.log
+
+# --- Node / Frontend ---
+node_modules/
+dist/
+*.lock
+
+# --- Secrets ---
+*.json
+firebase_connect.py
+
+# --- macOS System Files ---
+.DS_Store
