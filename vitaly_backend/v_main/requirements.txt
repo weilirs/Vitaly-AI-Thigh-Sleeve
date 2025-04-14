@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+psycopg2
+numpy
+scipy
+pandas
+matplotlib
+nbconvert
+Faker
+

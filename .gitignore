@@ -1,20 +1,54 @@
-# --- Python ---
-__pycache__/
-*.py[cod]
-*.db
-*.sqlite3
-.vscode/
-.vmm/
-*.log
+##############################
+# Backend: vitaly_backend #
+##############################
 
-# --- Node / Frontend ---
-node_modules/
-dist/
-*.lock
+# Python bytecode cache
+vitaly_backend/**/__pycache__/
+vitaly_backend/**/*.py[cod]
 
-# --- Secrets ---
-*.json
-firebase_connect.py
+# Local database and temp files
+vitaly_backend/**/*.db
+vitaly_backend/**/*.sqlite3
+vitaly_backend/**/*.log
 
-# --- macOS System Files ---
+# Virtual environment (vmm/)
+vitaly_backend/vmm/
+
+# Firebase service account key (!!! do not upload !!!)
+vitaly_backend/*.json
+
+# Local secret code
+vitaly_backend/v_main/firebase_connect.py
+
+
+##############################
+# Frontend: vitaly_frontend #
+##############################
+
+# Node modules (big and unnecessary)
+vitaly_frontend/node_modules/
+
+# Build artifacts
+vitaly_frontend/dist/
+vitaly_frontend/.parcel-cache/
+vitaly_frontend/.next/
+vitaly_frontend/.turbo/
+
+# Lock files (optional, based on preference)
+vitaly_frontend/package-lock.json
+vitaly_frontend/pnpm-lock.yaml
+vitaly_frontend/yarn.lock
+
+# Environment settings (if you add .env later)
+vitaly_frontend/.env
+vitaly_frontend/.env.*
+
+# macOS system files
 .DS_Store
+
+##############################
+# Others (universal)
+##############################
+
+# VS Code project settings (optional)
+.vscode/

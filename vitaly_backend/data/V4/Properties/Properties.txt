@@ -1,0 +1,6 @@
+Variables	Units
+CoP:	m
+EMG:	V
+GRF:	N
+FPM:	N.m
+Trajectories:	mm
