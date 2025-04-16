@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import * as echarts from "echarts";
 import {
   boxShadowSm,
   colorWhite,
@@ -10,13 +11,110 @@ import {
   colorBlue50,
   colorBlue500
 } from "../utils/styles";
-import { ApiData } from "../utils/types";
+import { ApiData, VelocityData, PreviousSessionData } from "../utils/types";
 
 interface ForceAnalysisProps {
   apiData: ApiData | null;
+  velocityData: VelocityData;
+  previousSessionData: PreviousSessionData;
 }
 
-const ForceAnalysis: React.FC<ForceAnalysisProps> = ({ apiData }) => {
+const ForceAnalysis: React.FC<ForceAnalysisProps> = ({ 
+  apiData, 
+  velocityData, 
+  previousSessionData 
+}) => {
+  // Initialize force-velocity chart
+  useEffect(() => {
+    const forceVelocityChartDom = document.getElementById("forceVelocityChart");
+    if (forceVelocityChartDom) {
+      const forceVelocityChart = echarts.init(forceVelocityChartDom);
+      const option = apiData
+        ? {
+            grid: { top: 20, right: 20, bottom: 40, left: 50 },
+            xAxis: {
+              type: "value",
+              name: "Velocity (m/s)",
+              nameLocation: "middle",
+              nameGap: 25,
+              min: 0,
+              max: 3,
+            },
+            yAxis: {
+              type: "value",
+              name: "Force (N)",
+              nameLocation: "middle",
+              nameGap: 35,
+              min: 0,
+              max: 1000,
+            },
+            series: [
+              {
+                name: "Current Session",
+                type: "line",
+                data: [[apiData.velocity, apiData.force]], // Single data point
+                smooth: true,
+                symbolSize: 8,
+                lineStyle: { color: "#3B82F6", width: 3 },
+                itemStyle: { color: "#3B82F6" },
+              },
+            ],
+          }
+        : {
+            grid: { top: 20, right: 20, bottom: 40, left: 50 },
+            xAxis: {
+              type: "value",
+              name: "Velocity (m/s)",
+              nameLocation: "middle",
+              nameGap: 25,
+              min: 0,
+              max: 3,
+            },
+            yAxis: {
+              type: "value",
+              name: "Force (N)",
+              nameLocation: "middle",
+              nameGap: 35,
+              min: 0,
+              max: 1000,
+            },
+            series: [
+              {
+                // Previous session curve
+                type: "line",
+                data: previousSessionData.force.map((force, index) => [
+                  previousSessionData.velocity[index],
+                  force,
+                ]),
+                smooth: true,
+                symbolSize: 6,
+                lineStyle: { color: "#E5E7EB", width: 2 },
+                itemStyle: { color: "#E5E7EB" },
+              },
+              {
+                // Current session curve
+                type: "line",
+                data: velocityData.force.map((force, index) => [
+                  velocityData.velocity[index],
+                  force,
+                ]),
+                smooth: true,
+                symbolSize: 8,
+                lineStyle: { color: "#3B82F6", width: 3 },
+                itemStyle: { color: "#3B82F6" },
+              },
+            ],
+          };
+    
+      forceVelocityChart.setOption(option);
+      
+      // Clean up
+      return () => {
+        forceVelocityChart.dispose();
+      };
+    }
+  }, [velocityData, previousSessionData, apiData]);
+
   return (
     <div
       style={{
