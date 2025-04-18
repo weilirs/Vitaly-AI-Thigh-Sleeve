@@ -24,11 +24,14 @@ import MuscleActivation from "./Components/MuscleActivation";
 import FatigueTracking from "./Components/FatigueTracking";
 import GaitStabilityMetrics from "./Components/GaitStabilityMetrics";
 import AICoachInsights from "./Components/AICoachInsights";
+import Login from "./Components/Login";
+import { Toaster } from "sonner";
 
 const App: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [apiData, setApiData] = useState<null | ApiData>(null);
-  const [selectedTab, setSelectedTab] = useState("dashboard");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedTab, setSelectedTab] = useState("dashboard");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showAICoach, setShowAICoach] = useState(false);
   const [aiMessages, setAiMessages] = useState<ChatMessage[]>([
@@ -40,6 +43,16 @@ const App: React.FC = () => {
   ]);
   const [emgData, setEmgData] = useState<number[]>([]);
   
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+  
+ 
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+  
   const [mvcValue, setMvcValue] = useState(87);
   const [fatigueScore, setFatigueScore] = useState(32);
   const [estimatedTime, setEstimatedTime] = useState(25);
@@ -48,6 +61,7 @@ const App: React.FC = () => {
   const [fatigueHistory, setFatigueHistory] = useState<number[]>(
     Array(20).fill(60)
   );
+
   const [enduranceData, setEnduranceData] = useState<number[]>([
     85, 82, 80, 78, 75, 73, 70,
   ]);
@@ -60,7 +74,7 @@ const App: React.FC = () => {
       .map(() => Math.random() * 200 + 650),
   });
 
-  const [velocityData, setVelocityData] = useState<VelocityData>({
+  const [velocityData] = useState<VelocityData>({
     force: [
       // Current session (shifted outward curve)
       1000, 800, 650, 520, 420, 340, 280, 230, 190, 160,
@@ -78,7 +92,7 @@ const App: React.FC = () => {
     internal: Array(10).fill(0),
   });
   
-  const [gaitData, setGaitData] = useState<GaitData>({
+  const [gaitData] = useState<GaitData>({
     current: [1.2, 1.3, 0.9, 1.1, 1.0, 0.95, 1.15],
     previous: [1.0, 1.1, 0.8, 0.9, 0.85, 0.8, 1.0],
     baseline: [0.8, 0.9, 0.7, 0.8, 0.75, 0.7, 0.85],
@@ -93,6 +107,9 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Only fetch data if the user is authenticated
+    if (!isAuthenticated) return;
+    
     const fetchLatest = async () => {
       try {
         const response = await fetch("http://localhost:8000/api/latest");
@@ -111,7 +128,7 @@ const App: React.FC = () => {
     // 每 10 秒自动刷新一次
     const intervalId = setInterval(fetchLatest, 10000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [isAuthenticated]);
 
   // correlation chart
   useEffect(() => {
@@ -208,74 +225,94 @@ const App: React.FC = () => {
     },
   ];
 
-  return (
-    <div
-      style={{
-        position: "relative",
-        width: "400px",
-        minHeight: "762px",
-        backgroundColor: colorGray50,
-      }}
-    >
-      {/* Nav Bar */}
-      <NavBar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+  if (!isAuthenticated) {
+    return (
+      <>
+        <Login onSubmit={() => handleLogin()} />
+        <Toaster />
+      </>
+    );
+  }
 
-      {/* Main Content */}
+  return (
+    <>
       <div
         style={{
-          paddingTop: "0px",
-          paddingBottom: "80px",
-          paddingLeft: "16px",
-          paddingRight: "16px",
+          position: "relative",
+          width: "400px",
+          minHeight: "762px",
+          backgroundColor: colorGray50,
         }}
       >
-        {/* Quick Stats */}
-        <QuickStats stats={generateQuickStats(apiData, estimatedTime)} />
+        {/* Nav Bar */}
+        <NavBar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
 
-        {/* Real-time EMG Graph */}
-        <EmgChart emgData={emgData} />
+        {/* Main Content */}
+        <div
+          style={{
+            paddingTop: "0px",
+            paddingBottom: "80px",
+            paddingLeft: "16px",
+            paddingRight: "16px",
+          }}
+        >
+          {/* Quick Stats */}
+          <QuickStats stats={generateQuickStats(apiData, estimatedTime)} />
 
-        {/* Muscle Force & Power Analysis */}
-        <ForceAnalysis 
-          apiData={apiData} 
-          velocityData={velocityData}
-          previousSessionData={previousSessionData}
-        />
+          {/* Real-time EMG Graph */}
+          <EmgChart emgData={emgData} />
 
-        {/* Muscle Activation & Efficiency */}
-        <MuscleActivation mvcValue={mvcValue} correlationChartId="correlationChart" />
+          {/* Muscle Force & Power Analysis */}
+          <ForceAnalysis 
+            apiData={apiData} 
+            velocityData={velocityData}
+            previousSessionData={previousSessionData}
+          />
 
-        {/* Fatigue & Endurance Tracking */}
-        <FatigueTracking
-          fatigueScore={fatigueScore}
-          fatigueHistory={fatigueHistory}
-          estimatedTime={estimatedTime}
-          mvcValue={mvcValue}
-          workoutZone={workoutZone}
-          setWorkoutZone={setWorkoutZone}
-        />
+          {/* Muscle Activation & Efficiency */}
+          <MuscleActivation mvcValue={mvcValue} correlationChartId="correlationChart" />
 
-        {/* Gait & Stability Metrics */}
-        <GaitStabilityMetrics gaitData={gaitData} />
+          {/* Fatigue & Endurance Tracking */}
+          <FatigueTracking
+            fatigueScore={fatigueScore}
+            fatigueHistory={fatigueHistory}
+            estimatedTime={estimatedTime}
+            mvcValue={mvcValue}
+            workoutZone={workoutZone}
+            setWorkoutZone={setWorkoutZone}
+          />
 
-        {/* AI Coach & Insights */}
-        <AICoachInsights
+          {/* Gait & Stability Metrics */}
+          <GaitStabilityMetrics gaitData={gaitData} />
+
+          {/* AI Coach & Insights */}
+          <AICoachInsights
+            isDarkMode={isDarkMode}
+            showAICoach={showAICoach}
+            setShowAICoach={setShowAICoach}
+            aiMessages={aiMessages}
+            insights={insights}
+            setAiMessages={setAiMessages}
+          />
+
+          {/* Logout Button */}
+          <button 
+            onClick={handleLogout}
+            className="mt-4 w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+
+        {/* Tab Bar */}
+        <TabBar
           isDarkMode={isDarkMode}
-          showAICoach={showAICoach}
-          setShowAICoach={setShowAICoach}
-          aiMessages={aiMessages}
-          insights={insights}
-          setAiMessages={setAiMessages}
+          selectedTab={selectedTab}
+          setSelectedTab={setSelectedTab}
         />
       </div>
-
-      {/* Tab Bar */}
-      <TabBar
-        isDarkMode={isDarkMode}
-        selectedTab={selectedTab}
-        setSelectedTab={setSelectedTab}
-      />
-    </div>
+      <Toaster />
+    </>
   );
 };
 
