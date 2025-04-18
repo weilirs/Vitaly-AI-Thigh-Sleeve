@@ -68,10 +68,10 @@ const App: React.FC = () => {
     velocity: [0.2, 0.5, 0.8, 1.1, 1.4, 1.7, 2.0, 2.3, 2.6, 2.9],
   });
 
-  const previousSessionData: PreviousSessionData = {
+  const [previousSessionData, setPreviousSessionData] = useState<PreviousSessionData>({
     force: [900, 720, 580, 460, 370, 300, 250, 210, 180, 150],
     velocity: [0.2, 0.5, 0.8, 1.1, 1.4, 1.7, 2.0, 2.3, 2.6, 2.9],
-  };
+  });
 
   const [correlationData, setCorrelationData] = useState<CorrelationData>({
     external: Array(10).fill(0),
